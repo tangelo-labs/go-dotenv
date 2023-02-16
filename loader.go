@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const maxStackLen = 50
+const maxStackLen = 5
 
 // Load loads the environment.
 func Load() error {
