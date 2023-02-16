@@ -1,11 +1,14 @@
 # Dotenv
 
+[![go test](https://github.com/tangelo-labs/go-dotenv/actions/workflows/go-test.yml/badge.svg)](https://github.com/tangelo-labs/go-dotenv/actions/workflows/go-test.yml)
+[![golangci-lint](https://github.com/tangelo-labs/go-dotenv/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/tangelo-labs/go-dotenv/actions/workflows/golangci-lint.yml)
+
 This package provides a simple mechanism for loading environment variables values into typed struct fields.
 
 ## Installation
 
 ```bash
-go get github.com/tangelolabs/go-dotenv
+go get github.com/tangelo-labs/go-dotenv
 ```
 
 ## Usage
@@ -21,7 +24,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/tangelolabs/go-dotenv"
+	"github.com/tangelo-labs/go-dotenv"
 )
 
 type config struct {
