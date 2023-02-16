@@ -5,7 +5,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/require"
-	"github.com/tangelolabs/go-dotenv"
+	"github.com/tangelo-labs/go-dotenv"
 )
 
 func TestWithOverride(t *testing.T) {

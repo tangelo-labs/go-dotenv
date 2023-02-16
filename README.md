@@ -5,7 +5,7 @@ This package provides a simple mechanism for loading environment variables value
 ## Installation
 
 ```bash
-go get github.com/tangelolabs/go-dotenv
+go get github.com/tangelo-labs/go-dotenv
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/tangelolabs/go-dotenv"
+	"github.com/tangelo-labs/go-dotenv"
 )
 
 type config struct {
