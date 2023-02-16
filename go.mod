@@ -1,4 +1,4 @@
-module github.com/tangelolabs/dotenv
+module github.com/tangelolabs/go-dotenv
 
 go 1.17
 

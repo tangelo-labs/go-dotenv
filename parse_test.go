@@ -8,7 +8,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/require"
-	"github.com/tangelolabs/dotenv"
+	"github.com/tangelolabs/go-dotenv"
 )
 
 func TestParse(t *testing.T) {

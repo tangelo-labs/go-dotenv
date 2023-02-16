@@ -9,13 +9,14 @@ type empty struct{}
 
 var withOverridePackagePath = reflect.TypeOf(empty{}).PkgPath() + ".WithOverride"
 
-// WithOverride overrides the environment variables with the given map and
-// restores them after the callback is executed.
+// WithOverride overrides the environment variables with the given ones
+// and restores them after the callback is executed.
 //
 // Any call to the Load, LoadAndParse or similar within the callback will be
 // affected by the overridden values.
 //
-// This function will panic if the number of arguments is not even.
+// This function will panic if the number of arguments is not even, or if there is
+// an error setting or unsetting the environment variables.
 //
 // Typical Usage Example:
 //
@@ -24,7 +25,7 @@ var withOverridePackagePath = reflect.TypeOf(empty{}).PkgPath() + ".WithOverride
 //	}, "FOO", "bar")
 func WithOverride(callback func(), kv ...string) {
 	if len(kv)%2 != 0 {
-		panic("dotenv: WithOverride requires an even number of arguments")
+		panic("dotenv.WithOverride requires an even number of arguments")
 	}
 
 	tuples := make(map[string]string, len(kv)/2)
@@ -37,8 +38,17 @@ func WithOverride(callback func(), kv ...string) {
 	}
 
 	original := make(map[string]string)
+	unset := make(map[string]struct{})
+
 	for k, v := range tuples {
-		original[k] = os.Getenv(k)
+		originalValue, defined := os.LookupEnv(k)
+		if defined {
+			original[k] = originalValue
+		}
+
+		if !defined {
+			unset[k] = empty{}
+		}
 
 		if err := os.Setenv(k, v); err != nil {
 			panic(err)
@@ -49,6 +59,12 @@ func WithOverride(callback func(), kv ...string) {
 
 	for k, v := range original {
 		if err := os.Setenv(k, v); err != nil {
+			panic(err)
+		}
+	}
+
+	for k := range unset {
+		if err := os.Unsetenv(k); err != nil {
 			panic(err)
 		}
 	}
