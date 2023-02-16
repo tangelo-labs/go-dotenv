@@ -40,12 +40,16 @@ func WithOverride(callback func(), kv ...string) {
 	for k, v := range tuples {
 		original[k] = os.Getenv(k)
 
-		os.Setenv(k, v)
+		if err := os.Setenv(k, v); err != nil {
+			panic(err)
+		}
 	}
 
 	callback()
 
 	for k, v := range original {
-		os.Setenv(k, v)
+		if err := os.Setenv(k, v); err != nil {
+			panic(err)
+		}
 	}
 }
