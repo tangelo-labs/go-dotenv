@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/fatih/structtag"
@@ -143,6 +144,10 @@ func Parse(st interface{}) error {
 
 		if err == nil {
 			defaultValue = defaultTag.Name
+
+			if len(defaultTag.Options) > 0 {
+				defaultValue = fmt.Sprintf("%s,%s", defaultValue, strings.Join(defaultTag.Options, ","))
+			}
 		}
 
 		isRequired := false
@@ -224,11 +229,15 @@ func valueForField(field reflect.Value, value value, tags *structtag.Tags, varNa
 	}
 
 	if fieldType.AssignableTo(stringSliceType) {
-		delimiter := ","
+		delimiter := ""
 		delimiterTag, gErr := tags.Get("delimiter")
 
 		if gErr == nil {
 			delimiter = delimiterTag.Name
+		}
+
+		if delimiter == "" {
+			delimiter = ","
 		}
 
 		return value.AsStringSlice(delimiter), nil

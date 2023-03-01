@@ -81,13 +81,15 @@ func TestParse(t *testing.T) {
 		})
 	})
 
-	t.Run("GIVEN a struct with a string slice and one variable defined with three elements", func(t *testing.T) {
+	t.Run("GIVEN a struct with a string slice and one variable defined with three elements and another with default 3 elements", func(t *testing.T) {
 		env := dummyStringSlice{}
 		require.NoError(t, os.Setenv("TEST_STRING_SLICE", "A;B;C"))
 
-		t.Run("WHEN parsing THEN slice is populated", func(t *testing.T) {
+		t.Run("WHEN parsing THEN slices are populated", func(t *testing.T) {
 			require.NoError(t, dotenv.Parse(&env))
+
 			require.EqualValues(t, []string{"A", "B", "C"}, env.StringSlice)
+			require.EqualValues(t, []string{"X", "Y", "Z"}, env.StringSliceWithDefaults)
 		})
 	})
 }
@@ -113,5 +115,6 @@ type dummyStructNotEmpty struct {
 }
 
 type dummyStringSlice struct {
-	StringSlice []string `env:"TEST_STRING_SLICE" delimiter:";"`
+	StringSlice             []string `env:"TEST_STRING_SLICE" delimiter:";"`
+	StringSliceWithDefaults []string `env:"TEST_STRING_SLICE_WITH_DEFAULTS" delimiter:";" default:"X;Y;Z"`
 }
