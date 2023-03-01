@@ -3,6 +3,7 @@ package dotenv_test
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,13 +20,19 @@ func TestParse(t *testing.T) {
 		require.NoError(t, err)
 
 		expectedEnv := dummyStruct{
-			String:   gofakeit.LoremIpsumWord(),
+			String: gofakeit.LoremIpsumWord(),
+			StringList: []string{
+				gofakeit.UUID(),
+				gofakeit.UUID(),
+				gofakeit.UUID(),
+			},
 			Int8:     gofakeit.Int8(),
 			Time:     pt,
 			Duration: time.Second,
 		}
 
 		require.NoError(t, os.Setenv("TEST_STRING", expectedEnv.String))
+		require.NoError(t, os.Setenv("TEST_STRING_LIST", strings.Join(expectedEnv.StringList, ";")))
 		require.NoError(t, os.Setenv("TEST_INT8", fmt.Sprintf("%d", expectedEnv.Int8)))
 		require.NoError(t, os.Setenv("TEST_TIME", tv))
 		require.NoError(t, os.Setenv("TEST_DURATION", "1s"))
@@ -86,10 +93,11 @@ func TestParse(t *testing.T) {
 }
 
 type dummyStruct struct {
-	String   string        `env:"TEST_STRING"`
-	Int8     int8          `env:"TEST_INT8"`
-	Time     time.Time     `env:"TEST_TIME" timeLayout:"2006-01-02T15:04:05"`
-	Duration time.Duration `env:"TEST_DURATION"`
+	String     string        `env:"TEST_STRING"`
+	StringList []string      `env:"TEST_STRING_LIST" delimiter:";"`
+	Int8       int8          `env:"TEST_INT8"`
+	Time       time.Time     `env:"TEST_TIME" timeLayout:"2006-01-02T15:04:05"`
+	Duration   time.Duration `env:"TEST_DURATION"`
 }
 
 type dummyStructWithRequire struct {
