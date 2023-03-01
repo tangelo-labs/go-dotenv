@@ -15,6 +15,7 @@ func TestWithOverride(t *testing.T) {
 		require.NoError(t, dotenv.LoadAndParse(&vars))
 		require.EqualValues(t, "bar", vars.Foo)
 		require.EqualValues(t, 42, vars.TheMeaningOfLifeTheUniverseAndEverything)
+		require.EqualValues(t, []string{"foo", "bar"}, vars.FakeList)
 
 		t.Run("WHEN overriding the environment variables with another values", func(t *testing.T) {
 			overrideValue := gofakeit.UUID()
@@ -26,18 +27,20 @@ func TestWithOverride(t *testing.T) {
 				require.NoError(t, dotenv.LoadAndParse(&vars))
 				require.EqualValues(t, overrideValue, vars.Foo)
 				require.EqualValues(t, 24, vars.TheMeaningOfLifeTheUniverseAndEverything)
+				require.EqualValues(t, []string{"1", "2", "3"}, vars.FakeList)
 			},
 				"FOO", overrideValue,
 				"DUMMY", "24",
+				"FAKE_LIST", "1,2,3",
 			)
 
 			t.Run("THEN callbacks was invoked AND new values were seen AND original values are restored", func(t *testing.T) {
-				require.True(t, funcWasCalled)
 				require.True(t, funcWasCalled)
 
 				require.NoError(t, dotenv.LoadAndParse(&vars))
 				require.EqualValues(t, "bar", vars.Foo)
 				require.EqualValues(t, 42, vars.TheMeaningOfLifeTheUniverseAndEverything)
+				require.EqualValues(t, []string{"foo", "bar"}, vars.FakeList)
 			})
 		})
 	})
@@ -88,6 +91,7 @@ func TestWithOverride(t *testing.T) {
 }
 
 type testEnv struct {
-	Foo                                      string `env:"FOO" default:"bar"`
-	TheMeaningOfLifeTheUniverseAndEverything int    `env:"DUMMY" default:"42"`
+	Foo                                      string   `env:"FOO" default:"bar"`
+	TheMeaningOfLifeTheUniverseAndEverything int      `env:"DUMMY" default:"42"`
+	FakeList                                 []string `env:"FAKE_LIST" default:"foo,bar" delimiter:","`
 }
