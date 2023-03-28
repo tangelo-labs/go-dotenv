@@ -95,7 +95,7 @@ func TestWithOverride(t *testing.T) {
 	t.Run("GIVEN an environment variable", func(t *testing.T) {
 		require.NoError(t, os.Setenv("GIT_GUT", "lol"))
 
-		t.Run("WHEN multiple goroutines are overriding the same variable THEN each goroutine should see its own overriden value", func(t *testing.T) {
+		t.Run("WHEN multiple goroutines are overriding the same variable THEN each goroutine should see its own overridden value", func(t *testing.T) {
 			wg := sync.WaitGroup{}
 			ng := 100
 
