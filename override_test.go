@@ -1,14 +1,12 @@
 package dotenv_test
 
 import (
-	"fmt"
-	"math/rand"
 	"os"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tangelo-labs/go-dotenv"
 )
@@ -97,33 +95,38 @@ func TestWithOverride(t *testing.T) {
 	t.Run("GIVEN an environment variable", func(t *testing.T) {
 		require.NoError(t, os.Setenv("GIT_GUT", "lol"))
 
-		t.Run("WHEN multiple goroutines are overriding THEN each goroutine should be its value", func(t *testing.T) {
-			muxAssert := sync.Mutex{}
+		t.Run("WHEN multiple goroutines are overriding the same variable THEN each goroutine should see its own overriden value", func(t *testing.T) {
 			wg := sync.WaitGroup{}
+			ng := 100
 
-			for i := 0; i < 100; i++ {
+			faker := gofakeit.New(time.Now().Unix())
+			ready := make(chan struct{})
 
-			}
-
-			for i := 0; i < 100; i++ {
+			for i := 0; i < ng; i++ {
 				wg.Add(1)
+
 				go func(idx int) {
-					val := fmt.Sprintf("%d", rand.New(rand.NewSource(int64(idx))).Int63())
-					fmt.Printf("val %d: %s\n", idx, val)
+					defer wg.Done()
+
+					value := faker.LoremIpsumSentence(5)
 
 					dotenv.WithOverride(func() {
-						defer wg.Done()
-						var env loneVarTestEnv
-						err := dotenv.LoadAndParse(&env)
+						var env testEnv
 
-						muxAssert.Lock()
-						assert.NoErrorf(t, err, "error on idx %d", idx)
-						assert.EqualValuesf(t, val, env.YRURunning, "assert fail on idx %d", idx)
-						muxAssert.Unlock()
-					}, "GIT_GUT", val)
+						<-ready
+
+						if err := dotenv.LoadAndParse(&env); err != nil {
+							t.Errorf("failed to load env: %s", err)
+						}
+
+						if env.ConcurrentString != value {
+							t.Errorf("expected %s, got %s", value, env.ConcurrentString)
+						}
+					}, "CONCURRENT_STRING", value)
 				}(i)
 			}
 
+			close(ready)
 			wg.Wait()
 		})
 	})
@@ -133,8 +136,5 @@ type testEnv struct {
 	Foo                                      string   `env:"FOO" default:"bar"`
 	TheMeaningOfLifeTheUniverseAndEverything int      `env:"DUMMY" default:"42"`
 	FakeList                                 []string `env:"FAKE_LIST" default:"foo,bar" delimiter:","`
-}
-
-type loneVarTestEnv struct {
-	YRURunning string `env:"GIT_GUT"`
+	ConcurrentString                         string   `env:"CONCURRENT_STRING" default:"foo"`
 }
