@@ -1,7 +1,10 @@
 package dotenv_test
 
 import (
+	"os"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/require"
@@ -88,10 +91,50 @@ func TestWithOverride(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("GIVEN an environment variable", func(t *testing.T) {
+		require.NoError(t, os.Setenv("GIT_GUT", "lol"))
+
+		t.Run("WHEN multiple goroutines are overriding the same variable THEN each goroutine should see its own overridden value", func(t *testing.T) {
+			wg := sync.WaitGroup{}
+			ng := 100
+
+			faker := gofakeit.New(time.Now().Unix())
+			ready := make(chan struct{})
+
+			for i := 0; i < ng; i++ {
+				wg.Add(1)
+
+				go func(idx int) {
+					defer wg.Done()
+
+					value := faker.LoremIpsumSentence(5)
+
+					dotenv.WithOverride(func() {
+						var env testEnv
+
+						<-ready
+
+						if err := dotenv.LoadAndParse(&env); err != nil {
+							t.Errorf("failed to load env: %s", err)
+						}
+
+						if env.ConcurrentString != value {
+							t.Errorf("expected %s, got %s", value, env.ConcurrentString)
+						}
+					}, "CONCURRENT_STRING", value)
+				}(i)
+			}
+
+			close(ready)
+			wg.Wait()
+		})
+	})
 }
 
 type testEnv struct {
 	Foo                                      string   `env:"FOO" default:"bar"`
 	TheMeaningOfLifeTheUniverseAndEverything int      `env:"DUMMY" default:"42"`
 	FakeList                                 []string `env:"FAKE_LIST" default:"foo,bar" delimiter:","`
+	ConcurrentString                         string   `env:"CONCURRENT_STRING" default:"foo"`
 }
