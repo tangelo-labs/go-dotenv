@@ -94,6 +94,25 @@ func TestParse(t *testing.T) {
 	})
 }
 
+func TestMustParse(t *testing.T) {
+	t.Run("GIVEN a struct with notEmpty variable and one variable defined but with no value", func(t *testing.T) {
+		env := dummyStructNotEmpty{}
+		require.NoError(t, os.Setenv("TEST_NOT_EMPTY", ""))
+
+		t.Run("WHEN using must-parseTHEN it panics", func(t *testing.T) {
+			require.Panics(t, func() {
+				dotenv.MustParse(&env)
+			})
+		})
+
+		t.Run("WHEN using must-load-and-parse THEN it panics", func(t *testing.T) {
+			require.Panics(t, func() {
+				dotenv.MustLoadAndParse(&env)
+			})
+		})
+	})
+}
+
 type dummyStruct struct {
 	String     string        `env:"TEST_STRING"`
 	StringList []string      `env:"TEST_STRING_LIST" delimiter:";"`
