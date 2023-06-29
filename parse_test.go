@@ -13,7 +13,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	t.Run("GIVEN a env struct with string, int8, time and duration fields AND env variables declared for such fields", func(t *testing.T) {
+	t.Run("GIVEN a env struct with string, int8, time & duration fields AND env variables declared for such fields", func(t *testing.T) {
 		tv := "2021-12-24T17:04:05"
 		tl := "2006-01-02T15:04:05"
 		pt, err := time.Parse(tl, tv)
@@ -65,15 +65,16 @@ func TestParse(t *testing.T) {
 	t.Run("GIVEN a struct with required variables", func(t *testing.T) {
 		env := dummyStructWithRequire{}
 
-		t.Run("WHEN parsing and variable is not defined THEN an error is raised", func(t *testing.T) {
+		t.Run("WHEN parsing AND variable is not defined THEN an error is raised", func(t *testing.T) {
 			err := dotenv.Parse(&env)
 			require.ErrorIs(t, err, dotenv.ErrRequiredField)
 		})
 	})
 
-	t.Run("GIVEN a struct with notEmpty variable and one variable defined but with no value", func(t *testing.T) {
+	t.Run("GIVEN a struct with notEmpty variable AND one variable defined but with no value", func(t *testing.T) {
 		env := dummyStructNotEmpty{}
-		require.NoError(t, os.Setenv("TEST_NOT_EMPTY", ""))
+
+		t.Setenv("TEST_NOT_EMPTY", "")
 
 		t.Run("WHEN parsing THEN an error is raised", func(t *testing.T) {
 			err := dotenv.Parse(&env)
@@ -81,15 +82,29 @@ func TestParse(t *testing.T) {
 		})
 	})
 
-	t.Run("GIVEN a struct with a string slice and one variable defined with three elements and another with default 3 elements", func(t *testing.T) {
+	t.Run("GIVEN a struct with a string slice AND one variable defined with three elements AND another with default 3 elements", func(t *testing.T) {
 		env := dummyStringSlice{}
-		require.NoError(t, os.Setenv("TEST_STRING_SLICE", "A;B;C"))
+
+		t.Setenv("TEST_STRING_SLICE", "A;B;C")
 
 		t.Run("WHEN parsing THEN slices are populated", func(t *testing.T) {
 			require.NoError(t, dotenv.Parse(&env))
 
 			require.EqualValues(t, []string{"A", "B", "C"}, env.StringSlice)
 			require.EqualValues(t, []string{"X", "Y", "Z"}, env.StringSliceWithDefaults)
+		})
+	})
+
+	t.Run("GIVEN a struct with a string slice AND one variable defined with zero", func(t *testing.T) {
+		env := dummyStringSlice{}
+
+		t.Setenv("TEST_STRING_SLICE", "")
+
+		t.Run("WHEN parsing THEN resulting slice has len zero", func(t *testing.T) {
+			require.NoError(t, dotenv.Parse(&env))
+
+			require.Len(t, env.StringSlice, 0)
+			require.Empty(t, env.StringSlice)
 		})
 	})
 }
