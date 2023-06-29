@@ -184,6 +184,13 @@ func Parse(st interface{}) error {
 	return nil
 }
 
+// MustParse convenience function which calls Parse and panics if an error is returned.
+func MustParse(st interface{}) {
+	if err := Parse(st); err != nil {
+		panic(err)
+	}
+}
+
 // LoadAndParse convenience function which first loads environment variables
 // and then injects them into the given struct.
 //
@@ -214,6 +221,14 @@ func LoadAndParse(st interface{}) error {
 	}
 
 	return Parse(st)
+}
+
+// MustLoadAndParse convenience function which calls LoadAndParse and panics if an error
+// is returned.
+func MustLoadAndParse(st interface{}) {
+	if err := LoadAndParse(st); err != nil {
+		panic(err)
+	}
 }
 
 func valueForField(field reflect.Value, value value, tags *structtag.Tags, varName string) (interface{}, error) {
