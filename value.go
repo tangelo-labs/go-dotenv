@@ -13,7 +13,7 @@ type value string
 
 // IsZero returns true if the value is empty.
 func (v value) IsZero() bool {
-	return v == ""
+	return strings.TrimSpace(string(v)) == ""
 }
 
 // AsInt cast this value to int type.
@@ -174,5 +174,9 @@ func (v value) AsDuration() time.Duration {
 
 // AsStringSlice cast this value to []string type.
 func (v value) AsStringSlice(delimiter string) []string {
+	if v.IsZero() {
+		return []string{}
+	}
+
 	return strings.Split(string(v), delimiter)
 }
