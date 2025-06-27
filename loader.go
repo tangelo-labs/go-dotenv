@@ -7,8 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const maxStackLen = 20
-
 // Load loads the environment.
 func Load() error {
 	cwd, err := os.Getwd()

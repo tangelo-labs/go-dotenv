@@ -9,16 +9,24 @@ import (
 	"sync"
 )
 
-type empty struct{}
+// maxStackLen is the maximum number of stack frames to inspect for the WithOverride call.
+const maxStackLen = 500
 
-var withOverridePackagePath = reflect.TypeOf(empty{}).PkgPath() + ".WithOverride"
+// packageMarker is a marker type to get the package path of the WithOverride function.
+type packageMarker struct{}
 
-var overrideStack = sync.Map{}
+var (
+	// withOverridePackagePath is the package path of the WithOverride function.
+	withOverridePackagePath = reflect.TypeOf(packageMarker{}).PkgPath() + ".WithOverride"
+
+	// overrideStack is a stack that holds the overridden environment variables indexed by goroutine ID.
+	overrideStack = sync.Map{}
+)
 
 // WithOverride overrides the environment variables with the given ones
 // and restores them after the callback is executed.
 //
-// Any call to the Load, LoadAndParse or similar within the callback will be
+// Any call to the Parse, LoadAndParse or similar within the callback will be
 // affected by the overridden values.
 //
 // This function will panic if the number of arguments is not even, or if there is
@@ -53,7 +61,8 @@ func WithOverride(callback func(), kv ...string) {
 	overrideStack.Delete(key)
 }
 
-func isOverridden() (map[string]string, bool) {
+// isOverriddenCall checks if the current execution context is within a WithOverride call.
+func isOverriddenCall() (map[string]string, bool) {
 	var pc [maxStackLen]uintptr
 
 	n := runtime.Callers(2, pc[:])
@@ -89,6 +98,7 @@ func isOverridden() (map[string]string, bool) {
 	return tuples, override
 }
 
+// goid returns the goroutine ID of the current goroutine.
 func goid() int {
 	var buf [64]byte
 
