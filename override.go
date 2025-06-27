@@ -16,8 +16,11 @@ const maxStackLen = 500
 type packageMarker struct{}
 
 var (
+	// withOverridePackagePath is the package path of the WithOverride function.
 	withOverridePackagePath = reflect.TypeOf(packageMarker{}).PkgPath() + ".WithOverride"
-	overrideStack           = sync.Map{}
+
+	// overrideStack is a stack that holds the overridden environment variables indexed by goroutine ID.
+	overrideStack = sync.Map{}
 )
 
 // WithOverride overrides the environment variables with the given ones
