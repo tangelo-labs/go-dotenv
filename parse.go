@@ -272,7 +272,7 @@ func valueForField(field reflect.Value, value value, tags *structtag.Tags, varNa
 
 // lookup similar to Get but returns whether the variable is present or not.
 func lookup(name string, def ...string) (value, bool) {
-	if tuples, overridden := isOverridden(); overridden {
+	if tuples, overridden := isOverriddenCall(); overridden {
 		if v, ok := tuples[name]; ok {
 			return value(v), true
 		}
