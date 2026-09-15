@@ -77,16 +77,19 @@ func isOverriddenCall() (map[string]string, bool) {
 
 		if f.Name() == withOverridePackagePath {
 			override = true
-			overrider := runtime.FuncForPC(pc[i+1])
 
-			if overrider != nil {
-				key := fmt.Sprintf("%d:%d:%s", goid(), pc[i+1], overrider.Name())
-				found, ok := overrideStack.Load(key)
+			if i+1 < len(pc) {
+				overrider := runtime.FuncForPC(pc[i+1])
 
-				if ok {
-					pairs, validType := found.(map[string]string)
-					if validType {
-						tuples = pairs
+				if overrider != nil {
+					key := fmt.Sprintf("%d:%d:%s", goid(), pc[i+1], overrider.Name())
+					found, ok := overrideStack.Load(key)
+
+					if ok {
+						pairs, validType := found.(map[string]string)
+						if validType {
+							tuples = pairs
+						}
 					}
 				}
 			}
